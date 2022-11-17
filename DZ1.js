@@ -1,5 +1,3 @@
-process.argv;
+const [userName]=process.argv.splice(2);
 
-const userName="Den";
-
-console.log(process.argv);
+console.log(`Hello ${userName}`);
