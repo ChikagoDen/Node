@@ -7,28 +7,26 @@ let setDate = dateTime.split('-',4);
 // const [hour,day,month,year]=arr;
 // Проверка даты (високосный не проверял)
 function  dateCorrect(arr){
+    console.log(arr);
     const [hour,day,month,year]=arr;
     let now = new Date();
     if(now.getFullYear()>+year){
         console.log("Таймер истек!!!");
         return 0;
     }
-    else if(now.getFullYear() == +year){
-        if(now.getMonth()+1>+month){
+    else if(now.getFullYear() == +year && now.getMonth()+1>+month){
+
             console.log("Таймер истек!!!");
             return 0;
         }
-        else if (now.getMonth()+1 == +month){
-            if(now.getDate()>+day ){
+    else if(now.getFullYear() == +year && now.getMonth()+1 == +month && now.getDate()>+day ){
                 console.log("Таймер истек!!!");
                 return 0;
             }
-            else if(now.getDate()==+day && now.getHours()>hour){
+    else if( now.getFullYear() == +year && now.getMonth()+1 == +month &&now.getDate()==+day && now.getHours()>hour){
                 console.log("Таймер истек!!!");
                 return 0;
             }
-        }
-    }
     else {
         console.log(+day);
         if(isNaN(+year)){
@@ -64,34 +62,27 @@ function  dateCorrect(arr){
     }
 }
 class Handler {
-    static send(payload) {
-        console.log('jopa');
+    static stop(timerId) {
+        setTimeout(() => { clearInterval(timerId);
+                 console.log('время закончилось!!!!');
+                }, 0);
     }
-
-    static receive(payload) {
-        console.log('Receive request');
+    static timerSec(payload) {
+        console.log('Начинаем новый отсчет секунд!!!');
     }
-
-    static sign(payload) {
-        console.log('Sign request');
+    static timerMin(payload) {
+        console.log('Начинаем новый отсчет минут!!!');
     }
-
-    static
-
-    send2() {
-        console.log('sobitie');
-        // setTimeout(() => { clearInterval(timerId);
-        //         console.log('stope');
-        //         }, 0);
+    static timerHours(payload) {
+        console.log('Начинаем новый часов!!!');
     }
-
-    static
-
-    send3() {
-        console.log('sobitie2');
-        // setTimeout(() => { clearInterval(timerId);
-        //     console.log('stope');
-        // }, 0);
+    static timerMonths(payload) {
+        console.log('Начинаем новый дней!!!');
+    }
+    static timerYears(payload) {
+        console.log('Начинаем новый лет!!!');
+    }
+    static timer(payload) {
     }
 }
 function timer(arr){
@@ -102,69 +93,78 @@ function timer(arr){
     let days=+day;
     let months=+month;
     let years=+year;
+    let type='timer';
     let timerId = setInterval(() => {
-        console.log(`Год = ${years} Месяц = ${months} День = ${days} Час = ${hours}  Минута = ${min} Секунда = ${sec--}`);
+        console.log(`Год = ${ years} Месяц = ${months} День = ${days} Час = ${hours}  Минута = ${min} Секунда = ${sec--}`);
         let now = new Date();
-
-        if(years==now.getFullYear()&&months==now.getMonth()+1&&days==now.getDate()&&hours==now.getHours()&&min==now.getMinutes()&&sec==0){
+        if(years==now.getFullYear()&&months==now.getMonth()+1&&days==now.getDate()&&hours==now.getHours()-1){
            type='stop';
        }
-        if(sec==0){
-            min--;
-            sec=60;
+
+        if(months==0&&days==0&&hours==0&&min==0&&sec==1){
+            years--;
+            months=12;
+            type='timerYears';
         }
-        if(min==0){
-            hours--;
-            min=60;
-        }
-        if(hours==0){
-            days--;
-            hours=24;
-        }
-        if(days==0){
+
+        if(days==0&&hours==0&&min==0&&sec==1) {
             months--;
-            switch(months) {
+            switch (months) {
                 case 4:
                 case 6:
                 case 9:
                 case 11:
-                    days=30;
+                    days = 30;
                     break;
                 case 2:
-                    days=28
+                    days = 28
                     break;
                 default:
-                    days=31;
+                    days = 31;
                     break;
             }
-            if(months==0){
-                years--;
-                months=12;
-            }
+            type='timerMonths';
+        }
+
+        if(hours==0&&min==0&&sec==1){
+            days--;
+            hours=24;
+            type='timerHours';
+        }
+
+        if(min==0&&sec==1){
+            hours--;
+            min=60;
+            type='timerMin';
+        }
+        if(sec==0){
+            min--;
+            sec=60;
+            type='timerSec';
         }
 
 
-        let type;
-        if(sec==55){
-            type='stop'
-        }
-        if(sec==50){
-             type='stop2'
-        }
-        emitterObject.emit(type);
+
+        emitterObject.emit(type,timerId);
+        type='timer';
 
     }, 0);
 }
 
 class MyEmitter extends EventEmitter {};
 const emitterObject = new MyEmitter();
-emitterObject.on('stop',Handler.send2)
-emitterObject.on('stop2',Handler.send3)
+emitterObject.on('stop',Handler.stop);
+emitterObject.on('timerSec',Handler.timerSec)
+emitterObject.on('timerMin',Handler.timerMin)
+emitterObject.on('timerHours',Handler.timerHours)
+emitterObject.on('timerMonths',Handler.timerMonths)
+emitterObject.on('timerYears',Handler.timerYears)
 
 let tmp=dateCorrect(setDate);
-// timer(tmp);
 
-console.log(setDate);
+ timer(tmp);
+
+console.log(tmp);
 
 
 
