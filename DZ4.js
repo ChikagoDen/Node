@@ -1,34 +1,75 @@
-import yargs from "yargs";
-import * as fs from "fs";
+#!/usr/local/bin/node
+
 import * as path from "path";
-import {hideBin} from "yargs/helpers";
 import readline from "readline";
+import inquirer from "inquirer";
+import fsp from "fs/promises"
+import colors from "colors";
+
 const rl=readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
 
 
+const root =process.cwd();
+const findFile = (dirName)=>{
+    return fsp
+        .readdir(dirName)
+        .then((choices)=>{
+            return inquirer
+                .prompt([
+                    {
+                    name:"fileName",
+                    type:"list",
+                    message:"ИНКУВЕР",
+                    choices,
 
-const __dirname ='/home/den/Рабочий стол/Проекты ларавель/Node'
-// //
-//
-// const options= yargs(hideBin(process.argv))
-//     .usage("Usage: -p <patch>")
-//     .option("p", { alias: "path", describe: "Path to file", demandOption: true})
-//     .argv;
-// console.log(options);
-// const fileName = options.path;
-// fs.readFile(path.join(__dirname, fileName),'utf8', (err, data) => {
-//     console.log(data);
-// });
-rl.question("Введите путь до файла:  ", (fileName)=>{
+                    },
+                    {
+                        name:"findString",
+                        type:"input",
+                        message:"Что ищем?",
+                    }
+                ])
+        })
+        .then(async ({fileName, findString})=>{
+            const fullPatch=path.join(dirName,fileName);
+            const stat = await fsp.stat( fullPatch);
+            if(!stat.isFile()){
+                return findFile(fullPatch)
+            }
+            return  Promise.all([
+                fsp.readFile(path.join(dirName,fileName),'utf-8'),
+                Promise.resolve(findString)
 
-    fs.readFile(path.join(__dirname, fileName),'utf8', (err, data) => {
-        console.log(data);
-        rl.close();
-    });
+            ])
 
 
-});
+        })
+        .then((result)=>{
+            if(result){
+                const [text,findString]=result;
+                const pattern = new RegExp(findString, "g");
+                let count=0;
+                const out = text.replace(pattern, ()=>{
+                    count++;
+                    return colors.red(findString);
+                });
+                console.log(out, "\n", colors.green(`Найдено ${count} совпадений.`));
+                rl.close();
+            }
+        })
+}
+
+rl.question(
+    `Вы находитесь здесь ${root} \n
+     Введите путь к директории: `,
+    (dirPatch)=>{
+        const dirName = path.join(root,dirPatch);
+        findFile(dirName);
+
+    }
+)
+
 rl.on('close', ()=>process.exit(0));
