@@ -10,21 +10,18 @@ const rl=readline.createInterface({
     input:process.stdin,
     output:process.stdout
 });
-
-
 const root =process.cwd();
 const findFile = (dirName)=>{
-    return fsp
+    fsp
         .readdir(dirName)
         .then((choices)=>{
             return inquirer
                 .prompt([
                     {
-                    name:"fileName",
-                    type:"list",
-                    message:"ИНКУВЕР",
-                    choices,
-
+                        name:"fileName",
+                        type:"list",
+                        message:"Выберите файл или папку!",
+                        choices,
                     },
                     {
                         name:"findString",
@@ -33,18 +30,18 @@ const findFile = (dirName)=>{
                     }
                 ])
         })
-        .then(async ({fileName, findString})=>{
+        .then(async ({fileName ,findString})=>{
             const fullPatch=path.join(dirName,fileName);
             const stat = await fsp.stat( fullPatch);
             if(!stat.isFile()){
                 return findFile(fullPatch)
             }
-            return  Promise.all([
-                fsp.readFile(path.join(dirName,fileName),'utf-8'),
-                Promise.resolve(findString)
-
-            ])
-
+            else {
+                return Promise.all([
+                    fsp.readFile(fullPatch, 'utf-8'),
+                    Promise.resolve(findString)
+                ])
+            }
 
         })
         .then((result)=>{
@@ -67,8 +64,7 @@ rl.question(
      Введите путь к директории: `,
     (dirPatch)=>{
         const dirName = path.join(root,dirPatch);
-        findFile(dirName);
-
+         findFile(dirName);
     }
 )
 
