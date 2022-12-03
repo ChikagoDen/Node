@@ -42,7 +42,6 @@ const findFile = (dirName)=>{
                     Promise.resolve(findString)
                 ])
             }
-
         })
         .then((result)=>{
             if(result){
