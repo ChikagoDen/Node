@@ -1,5 +1,4 @@
 import http from "http";
-
 import fs from "fs";
 import path from "path";
 import { Server } from "socket.io"
@@ -23,10 +22,9 @@ io.on('connection', (client) => {
     client.broadcast.emit('server-msg', { msg: "Подключился новый клиент: "+client.id})
     client.on('disconnect', (data) => {
         client.broadcast.emit('server-msg', { msg: "Отключился клиент: "+client.id })
-        client.emit('server-msg', { msg: "Отключился клиент: "+client.id })
     })
     client.on('client-msg', (data) => {
-        client.broadcast.emit('server-msg', { msg: client.id+" пишет :"+data.msg })
+        client.broadcast.emit('server-msg', { msg: "Клиент "+client.id+" пишет :"+data.msg })
         client.emit('server-msg', { msg: "Вы написали: "+data.msg })
     })
 
