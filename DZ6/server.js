@@ -1,12 +1,12 @@
 import http from "http";
+
 import fs from "fs";
 import path from "path";
 import { Server } from "socket.io"
-import {Handler} from "./handler.js";
-// import {mfs} from "./mfs";
 
 const host = "localhost";
 const port = 3000;
+
 
 const server = http.createServer((req, res) => {
     if (["GET", "POST", "PUT"].includes(req.method)) {
@@ -18,22 +18,17 @@ const server = http.createServer((req, res) => {
     }
 });
 const io = new Server(server)
-
-const clients = []
-io.on('connection', (client) => { clients.push(client)
-
+io.on('connection', (client) => {
+    console.log(client)
     console.log('Websocket connected')
 
-    MyEmitter.on("send", (payload) => {
-        client.emit('server-msg', Handler.send(payload))
+    client.on('client-msg', (data) => {
+        client.broadcast.emit('server-msg', { msg: data.msg })
+        client.emit('server-msg', { msg: data.msg })
     })
-    MyEmitter.on("receive", (payload) => {
-        client.emit('server-msg', Handler.receive(payload))
-    })
-    MyEmitter.on("sign", (payload) => {
-        client.emit('server-msg', Handler.sign(payload))
-    })
+
 })
+
 
 server.listen(port, host, () =>
     console.log(`Server running at http://${host}:${port}`)
